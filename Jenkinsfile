@@ -4,7 +4,7 @@ pipeline {
   stages {
     stage('Clone Repo') {
       steps {
-        git url: 'https://github.com/your-org/your-repo.git', branch: 'main'
+        git url: 'https://github.com/arijitpaul14/Liquibase-Jenkins-Pipeline.git', branch: 'main'
       }
     }
 
@@ -13,7 +13,7 @@ pipeline {
         sh '''
           docker exec liquibase liquibase \
             --changeLogFile=db.changelog-master.xml \
-            --url="jdbc:sqlserver://mssql:1433;databaseName=master" \
+            --url="jdbc:sqlserver://localhost:1433;databaseName=master" \
             --username=sa \
             --password=StrongP@ssw0rd! \
             --driver=com.microsoft.sqlserver.jdbc.SQLServerDriver \
