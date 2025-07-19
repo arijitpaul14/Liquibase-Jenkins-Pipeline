@@ -13,7 +13,7 @@ pipeline {
         sh '''
           docker exec liquibase liquibase \
             --changeLogFile=db.changelog-master.xml \
-            --url="jdbc:sqlserver://localhost:1433;databaseName=student_management" \
+            --url="jdbc:sqlserver://0.0.0.0:1433;databaseName=student_management" \
             --username=sa \
             --password=StrongP@ssw0rd! \
             --driver=com.microsoft.sqlserver.jdbc.SQLServerDriver \
