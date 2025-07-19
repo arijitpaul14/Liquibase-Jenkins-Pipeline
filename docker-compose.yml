@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql
+    environment:
+      ACCEPT_EULA: 'Y'
+      SA_PASSWORD: 'StrongP@ssw0rd!'
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  jenkins:
+    build: ./jenkins
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+
+  liquibase:
+    build: ./liquibase
+    container_name: liquibase
+    depends_on:
+      - mssql
+    volumes:
+      - ./changelogs:/liquibase/changelogs
+
+volumes:
+  mssql_data:
+  jenkins_home:

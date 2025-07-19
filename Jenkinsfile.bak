@@ -1,0 +1,44 @@
+pipeline {
+  agent any
+
+  environment {
+    REMOTE_HOST = 'ubuntu@<LIQUIBASE_SERVER_IP>'
+    REMOTE_WORKDIR = '/home/ubuntu/liquibase-deploy'
+    DB_USER =  'DB_USER'
+    DB_PASSWORD =  'DB_PASSWORD'
+  }
+
+  stages {
+    stage('Checkout Code') {
+      steps {
+        git url: 'https://github.com/your-org/liquibase-mssql-pipeline.git', branch: 'main'
+      }
+    }
+
+    stage('Copy Files to Liquibase Server') {
+      steps {
+        sshagent (credentials: ['liquibase-ssh-key']) {
+          sh """
+            ssh -o StrictHostKeyChecking=no $REMOTE_HOST 'mkdir -p $REMOTE_WORKDIR'
+            rsync -avz -e ssh ./ $REMOTE_HOST:$REMOTE_WORKDIR/
+          """
+        }
+      }
+    }
+
+    stage('Run Liquibase') {
+      steps {
+        sshagent (credentials: ['liquibase-ssh-key']) {
+          sh """
+            ssh $REMOTE_HOST '
+              cd $REMOTE_WORKDIR &&
+              export DB_USER="$DB_USER" &&
+              export DB_PASSWORD="$DB_PASSWORD" &&
+              liquibase update
+            '
+          """
+        }
+      }
+    }
+  }
+}

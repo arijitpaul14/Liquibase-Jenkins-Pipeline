@@ -1,0 +1,37 @@
+pipeline {
+  agent any
+
+  environment {
+    DB_USER =  'DB_USER'
+    DB_PASSWORD =  'DB_PASSWORD'
+    WORKDIR = '/home/ubuntu/liquibase-deploy'
+  }
+
+  stages {
+    stage('Checkout Code') {
+      steps {
+        git url: 'https://github.com/your-org/liquibase-mssql-pipeline.git', branch: 'MainBranch'
+      }
+    }
+
+    stage('Copy Files to Liquibase Server') {
+      steps {
+          sh """
+            rsync -avz -e ssh ./WORKDIR/
+          """
+      }
+    }
+
+    stage('Run Liquibase') {
+      steps {
+          sh """
+              cd $WORKDIR &&
+              export DB_USER="$DB_USER" &&
+              export DB_PASSWORD="$DB_PASSWORD" &&
+              liquibase update
+          """
+        }
+      }
+    }
+  }
+}
