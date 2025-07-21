@@ -2,14 +2,13 @@ version: '3.8'
 
 networks:
   app-network:
-    driver: bridge
+    name: app-network  # Fixed network name
 
 services:
   mssql:
     networks:
       - app-network
     image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: mssql
     environment:
       ACCEPT_EULA: 'Y'
       SA_PASSWORD: 'StrongP@ssw0rd!'
@@ -19,32 +18,17 @@ services:
       - mssql_data:/var/opt/mssql
 
   jenkins:
+    build:
+      context: ./jenkins
+      args:
+        DOCKER_GID: ${DOCKER_GID}  # Pass host's Docker GID
     networks:
       - app-network
-    build: ./jenkins
-    container_name: jenkins
     ports:
       - "8080:8080"
-      - "50001:50001"
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-
-  liquibase:
-    networks:
-      - app-network
-    build: ./liquibase
-    container_name: liquibase
-    volumes:
-      - ./changelogs:/liquibase/changelogs
-    command: >
-      bash -c "while ! nc -z mssql 1433; do sleep 2; done;
-      liquibase --changeLogFile=db.changelog-master.xml
-      --url='jdbc:sqlserver://mssql:1433;databaseName=student_management'
-      --username=sa
-      --password=StrongP@ssw0rd!
-      --driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
-      update"
 
 volumes:
   mssql_data:
