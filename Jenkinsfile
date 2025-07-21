@@ -17,9 +17,12 @@ pipeline {
     }
     
     stage('Wait for MSSQL') {
-      steps {
-        sh 'until nc -z mssql 1433; do sleep 2; done'
-      }
+        steps {
+            // Use timeout to prevent infinite waiting
+            timeout(time: 2, unit: 'MINUTES') {
+            sh 'while ! nc -z mssql 1433; do sleep 5; done; echo "MSSQL ready"'
+            }
+        }
     }
     
     stage('Run Migration') {

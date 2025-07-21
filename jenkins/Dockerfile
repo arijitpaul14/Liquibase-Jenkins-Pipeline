@@ -4,7 +4,7 @@ USER root
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    git curl unzip netcat \
+    git curl unzip netcat-openbsd \
     && curl -fsSL https://get.docker.com | sh \
     && rm -rf /var/lib/apt/lists/*
 
